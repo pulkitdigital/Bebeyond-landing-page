@@ -1,10 +1,13 @@
 {
   "version": 2,
+  "buildCommand": "next build",
   "builds": [
-    { "src": "next.config.mjs", "use": "@vercel/next" }
+    {
+      "src": "next.config.mjs",
+      "use": "@vercel/next"
+    }
   ],
   "framework": "nextjs",
-  "buildCommand": "next build",
   "devCommand": "next dev",
   "installCommand": "npm install",
   "ignoreCommand": "git diff --quiet HEAD^ HEAD ./",
