@@ -4,12 +4,9 @@
     { "src": "next.config.mjs", "use": "@vercel/next" }
   ],
   "framework": "nextjs",
-  "regions": ["iad1"],
-  "env": {
-    "NODE_ENV": "production"
-  },
-  "installCommand": "npm ci",
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "ignoreCommand": "git ls-files --others --exclude-standard --directory"
+  "buildCommand": "next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./",
+  "outputDirectory": ".next"
 }
