@@ -1,0 +1,12 @@
+.our-projects-1-cards-container {
+  .card-div-of-our-projects-1-cards-container {
+    transition: box-shadow 500ms ease-in-out;
+    &:hover {
+      box-shadow: 4px 4px 8px rgba(116, 116, 117, 0.500);
+    }
+    .curve-line-div-for-card-div-of-our-projects-1-cards-container{
+      bottom: -25px;
+      right: -25px;
+    }
+  }
+}

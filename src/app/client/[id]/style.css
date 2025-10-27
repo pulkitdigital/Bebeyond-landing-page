@@ -1,0 +1,52 @@
+main {
+  .our-projects-3-container {
+    .our-projects-3 {
+      .h2-div-for-our-projects-3 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        border-left: 2px solid #219ebc;
+        padding-left: 7px;
+        height: 16px;
+        margin-left: 50px;
+        .span-for-h2-div-for-our-projects-3 {
+          position: absolute;
+          min-height: 2px;
+          min-width: 50px;
+          background-color: #219ebc;
+          left: -50px;
+        }
+      }
+      .our-projects-3-cards-container {
+        .card-div-of-our-projects-3-cards-container {
+          .curve-line-div-for-card-div-of-our-projects-3-cards-container {
+            bottom: -25px;
+            right: -25px;
+          }
+          .p-of-card-div-of-our-projects-3-cards-container {
+            position: relative;
+            &::after {
+              transition: width 500ms ease-in-out;
+              content: "";
+              position: absolute;
+              bottom: 0px;
+              left: 0;
+              width: 0;
+              height: 2px;
+              background: #fb8500;
+            }
+          }
+
+          &:hover {
+            .p-of-card-div-of-our-projects-3-cards-container {
+              &::after {
+                width: 100%;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

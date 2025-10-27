@@ -1,0 +1,29 @@
+.main-of-why-work-with-us-1 {
+  background-image: url("../../../../public/cta-img.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  .div-for-bg-light-black-of-main-of-why-work-with-us-1 {
+    background: rgba(28, 28, 52, 0.88);
+  }
+  .why-work-with-us-1-container {
+    .why-work-with-us-1 {
+      .h2-div-for-why-work-with-us-1 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        border-left: 2px solid #219ebc;
+        padding-left: 7px;
+        height: 16px;
+        .span-for-h2-div-for-why-work-with-us-1 {
+          position: absolute;
+          min-height: 2px;
+          min-width: 50%;
+          background-color: #219ebc;
+          left: -50%;
+        }
+      }
+    }
+  }
+}

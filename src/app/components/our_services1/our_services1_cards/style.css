@@ -1,0 +1,10 @@
+.our-services-1-cards-container {
+  .card-div-of-our-services-1-cards-container {
+    .img-div-of-card-div-of-our-services-1-cards-container {
+      transform: skew(-25deg) rotate(-7deg);
+      img {
+        transform: skew(25deg) rotate(7deg);
+      }
+    }
+  }
+}

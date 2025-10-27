@@ -1,0 +1,24 @@
+main {
+  .our-projects-1-container {
+    .our-projects-1 {
+      .h2-div-for-our-projects-1 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        border-left: 2px solid #219ebc;
+        padding-left: 7px;
+        height: 16px;
+        margin-left: 50px;
+
+        .span-for-h2-div-for-our-projects-1 {
+          position: absolute;
+          min-height: 2px;
+          min-width: 50px;
+          background-color: #219ebc;
+          left: -50px;
+        }
+      }
+    }
+  }
+}
