@@ -17,7 +17,7 @@ const founderInfo = [
 const stats = [
   { value: '2024', label: 'Founded' },
   { value: '50+',  label: 'Clients Served' },
-  { value: '3×',   label: 'Avg. Growth' },
+  { value: '12×',   label: 'Avg. Growth' },
 ]
 
 export default function Founder() {

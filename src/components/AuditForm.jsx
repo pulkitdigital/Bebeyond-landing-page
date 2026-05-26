@@ -4,9 +4,53 @@ import { motion, useInView, AnimatePresence } from 'framer-motion'
 import { FiArrowRight, FiChevronDown, FiLock } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
 import { HiCheckCircle } from 'react-icons/hi2'
+import emailjs from '@emailjs/browser'
+
+// ── EmailJS config ──────────────────────────────────────────────
+const EJS_SERVICE  = 'service_x0ammcq'
+const EJS_TEMPLATE = 'template_tlz9frl'   // 👈 replace karo
+const EJS_PUBLIC   = 'UmIkK9F57SH7BDnNh'    // 👈 replace karo
+
+const fieldVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] },
+  }),
+}
+
+const inputStyle = {
+  width: '100%',
+  padding: '13px 16px',
+  border: '1.5px solid var(--border)',
+  borderRadius: 10,
+  fontSize: 15,
+  fontFamily: "'Public Sans', sans-serif",
+  color: 'var(--ink)',
+  background: 'white',
+  outline: 'none',
+  transition: 'border-color 0.2s',
+  appearance: 'none',
+  boxSizing: 'border-box',
+}
+
+const labelStyle = {
+  display: 'block',
+  fontSize: 12,
+  fontWeight: 600,
+  color: 'var(--ink)',
+  marginBottom: 8,
+  textTransform: 'uppercase',
+  letterSpacing: '0.5px',
+  fontFamily: "'Public Sans', sans-serif",
+}
 
 export default function AuditForm() {
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading]     = useState(false)
+  const [error, setError]         = useState('')
+
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -16,62 +60,79 @@ export default function AuditForm() {
   })
 
   const sectionRef = useRef()
-  const inView = useInView(sectionRef, { once: true, margin: '-80px' })
+  const inView     = useInView(sectionRef, { once: true, margin: '-80px' })
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setError('')
+
     if (!form.name.trim() || !form.phone.trim() || !form.business.trim()) {
-      alert('Please fill in your name, phone number, and business name.')
+      setError('Please fill in your name, phone number, and business name.')
       return
     }
     if (form.phone.replace(/\D/g, '').length < 10) {
-      alert('Please enter a valid 10-digit phone number.')
+      setError('Please enter a valid 10-digit phone number.')
       return
     }
-    setSubmitted(true)
-  }
 
-  const inputStyle = {
-    width: '100%',
-    padding: '13px 16px',
-    border: '1.5px solid var(--border)',
-    borderRadius: 10,
-    fontSize: 15,
-    fontFamily: "'Public Sans', sans-serif",
-    color: 'var(--ink)',
-    background: 'white',
-    outline: 'none',
-    transition: 'border-color 0.2s',
-    appearance: 'none',
-    boxSizing: 'border-box',
-  }
-  const labelStyle = {
-    display: 'block',
-    fontSize: 12,
-    fontWeight: 600,
-    color: 'var(--ink)',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    fontFamily: "'Public Sans', sans-serif",
-  }
-
-  const fieldVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: (i) => ({
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.45, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] },
-    }),
+    setLoading(true)
+    try {
+      await emailjs.send(
+        EJS_SERVICE,
+        EJS_TEMPLATE,
+        {
+          from_name     : form.name.trim(),
+          phone         : form.phone.trim(),
+          business      : form.business.trim(),
+          business_type : form.type      || 'Not specified',
+          challenge     : form.challenge || 'Not specified',
+          time          : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+        },
+        EJS_PUBLIC
+      )
+      setSubmitted(true)
+    } catch (err) {
+      console.error(err)
+      setError('Something went wrong. Please try WhatsApp instead.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <section id="audit-form" style={{ background: 'var(--white)', padding: '80px 5%' }}>
       <style>{`
-        @media (max-width: 600px) {
-          #audit-form { padding: 50px 4% !important; }
-          #audit-card { padding: 32px 20px !important; border-radius: 16px !important; }
-          #audit-card h2 { font-size: 22px !important; }
+        .audit-input:focus { border-color: var(--blue) !important; }
+        .audit-btn-shimmer { position: relative; overflow: hidden; }
+        .audit-btn-shimmer::before {
+          content: '';
+          position: absolute;
+          top: 0; left: -75%;
+          width: 50%; height: 100%;
+          background: rgba(255,255,255,0.18);
+          transform: skewX(-20deg);
+          animation: shimmer 3s ease-in-out infinite 1s;
         }
+        @keyframes shimmer { 0%{left:-75%} 40%{left:125%} 100%{left:125%} }
+        .audit-error {
+          background: #fef2f2;
+          border: 1px solid #fecaca;
+          color: #dc2626;
+          border-radius: 8px;
+          padding: 10px 14px;
+          font-size: 13px;
+          font-family: 'Public Sans', sans-serif;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        @media (max-width: 600px) {
+          #audit-form          { padding: 50px 4% !important; }
+          #audit-card          { padding: 28px 18px !important; border-radius: 16px !important; }
+          #audit-card h2       { font-size: 20px !important; }
+          .whatsapp-text-full  { display: none; }
+          .whatsapp-text-short { display: inline !important; }
+        }
+        .whatsapp-text-short { display: none; }
       `}</style>
 
       <div ref={sectionRef} style={{ maxWidth: 680, margin: '0 auto' }}>
@@ -131,20 +192,19 @@ export default function AuditForm() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
                   {/* Name */}
-                  <motion.div custom={0} variants={fieldVariants} initial="hidden" animate={inView ? "visible" : "hidden"}>
+                  <motion.div custom={0} variants={fieldVariants} initial="hidden" animate={inView ? 'visible' : 'hidden'}>
                     <label style={labelStyle}>Your Name *</label>
                     <input
+                      className="audit-input"
                       style={inputStyle}
                       placeholder="e.g. Rahul Sharma"
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      onFocus={(e) => { e.target.style.borderColor = 'var(--blue)' }}
-                      onBlur={(e) => { e.target.style.borderColor = 'var(--border)' }}
                     />
                   </motion.div>
 
                   {/* Phone */}
-                  <motion.div custom={1} variants={fieldVariants} initial="hidden" animate={inView ? "visible" : "hidden"}>
+                  <motion.div custom={1} variants={fieldVariants} initial="hidden" animate={inView ? 'visible' : 'hidden'}>
                     <label style={labelStyle}>
                       Phone Number *{' '}
                       <span style={{ fontWeight: 400, opacity: 0.6, textTransform: 'none', letterSpacing: 0 }}>
@@ -152,42 +212,48 @@ export default function AuditForm() {
                       </span>
                     </label>
                     <input
+                      className="audit-input"
                       style={inputStyle}
                       type="tel"
                       placeholder="+91 98765 43210"
                       value={form.phone}
                       onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                      onFocus={(e) => { e.target.style.borderColor = 'var(--blue)' }}
-                      onBlur={(e) => { e.target.style.borderColor = 'var(--border)' }}
                     />
                   </motion.div>
 
                   {/* Business Name */}
-                  <motion.div custom={2} variants={fieldVariants} initial="hidden" animate={inView ? "visible" : "hidden"}>
+                  <motion.div custom={2} variants={fieldVariants} initial="hidden" animate={inView ? 'visible' : 'hidden'}>
                     <label style={labelStyle}>Business Name *</label>
                     <input
+                      className="audit-input"
                       style={inputStyle}
                       placeholder="e.g. Sharma Jewellers"
                       value={form.business}
                       onChange={(e) => setForm({ ...form, business: e.target.value })}
-                      onFocus={(e) => { e.target.style.borderColor = 'var(--blue)' }}
-                      onBlur={(e) => { e.target.style.borderColor = 'var(--border)' }}
                     />
                   </motion.div>
 
                   {/* Business Type */}
-                  <motion.div custom={3} variants={fieldVariants} initial="hidden" animate={inView ? "visible" : "hidden"}>
+                  <motion.div custom={3} variants={fieldVariants} initial="hidden" animate={inView ? 'visible' : 'hidden'}>
                     <label style={labelStyle}>Business Type</label>
                     <div style={{ position: 'relative' }}>
                       <select
+                        className="audit-input"
                         style={{ ...inputStyle, paddingRight: 36 }}
                         value={form.type}
                         onChange={(e) => setForm({ ...form, type: e.target.value })}
                       >
                         <option value="">Select your business type</option>
-                        {['Retail Store','Education / Coaching Institute','Food & Beverage / Restaurant / Cafe','Healthcare / Clinic','E-Commerce / Online Store','Service Business','Hospitality / Events','Other'].map((o) => (
-                          <option key={o}>{o}</option>
-                        ))}
+                        {[
+                          'Retail Store',
+                          'Education / Coaching Institute',
+                          'Food & Beverage / Restaurant / Cafe',
+                          'Healthcare / Clinic',
+                          'E-Commerce / Online Store',
+                          'Service Business',
+                          'Hospitality / Events',
+                          'Other',
+                        ].map((o) => <option key={o}>{o}</option>)}
                       </select>
                       <FiChevronDown
                         className="pointer-events-none absolute right-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--muted)]"
@@ -197,18 +263,24 @@ export default function AuditForm() {
                   </motion.div>
 
                   {/* Challenge */}
-                  <motion.div custom={4} variants={fieldVariants} initial="hidden" animate={inView ? "visible" : "hidden"}>
+                  <motion.div custom={4} variants={fieldVariants} initial="hidden" animate={inView ? 'visible' : 'hidden'}>
                     <label style={labelStyle}>Biggest Challenge</label>
                     <div style={{ position: 'relative' }}>
                       <select
+                        className="audit-input"
                         style={{ ...inputStyle, paddingRight: 36 }}
                         value={form.challenge}
                         onChange={(e) => setForm({ ...form, challenge: e.target.value })}
                       >
                         <option value="">What&apos;s your main goal?</option>
-                        {['Need more customers / enquiries','Build or fix my website','Run effective ads','Manage my social media','Improve Google ranking (SEO)','Not sure — need advice'].map((o) => (
-                          <option key={o}>{o}</option>
-                        ))}
+                        {[
+                          'Need more customers / enquiries',
+                          'Build or fix my website',
+                          'Run effective ads',
+                          'Manage my social media',
+                          'Improve Google ranking (SEO)',
+                          'Not sure — need advice',
+                        ].map((o) => <option key={o}>{o}</option>)}
                       </select>
                       <FiChevronDown
                         className="pointer-events-none absolute right-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--muted)]"
@@ -217,39 +289,70 @@ export default function AuditForm() {
                     </div>
                   </motion.div>
 
+                  {/* Error message */}
+                  <AnimatePresence>
+                    {error && (
+                      <motion.div
+                        className="audit-error"
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        ⚠️ {error}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   {/* Submit Button */}
-                  <motion.div custom={5} variants={fieldVariants} initial="hidden" animate={inView ? "visible" : "hidden"}>
+                  <motion.div custom={5} variants={fieldVariants} initial="hidden" animate={inView ? 'visible' : 'hidden'}>
                     <motion.button
                       type="button"
                       onClick={handleSubmit}
-                      whileHover={{ translateY: -2, boxShadow: '0 8px 28px rgba(251,133,0,0.45)' }}
-                      whileTap={{ scale: 0.98 }}
+                      disabled={loading}
+                      className="audit-btn-shimmer"
+                      whileHover={!loading ? { translateY: -2, boxShadow: '0 8px 28px rgba(251,133,0,0.45)' } : {}}
+                      whileTap={!loading ? { scale: 0.98 } : {}}
                       style={{
                         width: '100%',
                         padding: '17px',
-                        background: 'var(--orange)',
+                        background: loading ? '#f0a050' : 'var(--orange)',
                         color: 'white',
                         border: 'none',
                         borderRadius: 10,
                         fontFamily: "'Bricolage Grotesque', sans-serif",
                         fontWeight: 700,
                         fontSize: 17,
-                        cursor: 'pointer',
+                        cursor: loading ? 'not-allowed' : 'pointer',
                         boxShadow: '0 4px 20px rgba(251,133,0,0.3)',
                         display: 'inline-flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: 8,
+                        transition: 'background 0.2s',
                       }}
                     >
-                      Send My Audit Request
-                      <FiArrowRight style={{ width: 20, height: 20, flexShrink: 0 }} />
+                      {loading ? (
+                        <>
+                          <motion.span
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                            style={{ display: 'inline-block', width: 18, height: 18, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%' }}
+                          />
+                          Sending…
+                        </>
+                      ) : (
+                        <>
+                          Send My Audit Request
+                          <FiArrowRight style={{ width: 20, height: 20, flexShrink: 0 }} />
+                        </>
+                      )}
                     </motion.button>
                   </motion.div>
 
                   {/* Divider */}
                   <motion.div
-                    custom={6} variants={fieldVariants} initial="hidden" animate={inView ? "visible" : "hidden"}
+                    custom={6} variants={fieldVariants} initial="hidden" animate={inView ? 'visible' : 'hidden'}
                     style={{
                       textAlign: 'center',
                       fontSize: 13,
@@ -266,7 +369,7 @@ export default function AuditForm() {
                   </motion.div>
 
                   {/* WhatsApp */}
-                  <motion.div custom={7} variants={fieldVariants} initial="hidden" animate={inView ? "visible" : "hidden"}>
+                  <motion.div custom={7} variants={fieldVariants} initial="hidden" animate={inView ? 'visible' : 'hidden'}>
                     <motion.a
                       href="https://wa.me/919918671867?text=Hi%2C%20I%20want%20to%20book%20a%20free%20digital%20audit%20for%20my%20business."
                       target="_blank"
@@ -287,16 +390,18 @@ export default function AuditForm() {
                         fontWeight: 700,
                         fontSize: 15,
                         textDecoration: 'none',
+                        boxSizing: 'border-box',
                       }}
                     >
                       <FaWhatsapp style={{ width: 20, height: 20, flexShrink: 0 }} />
-                      Chat on WhatsApp — +91 99 1867 1867
+                      <span className="whatsapp-text-full">Chat on WhatsApp — +91 99 1867 1867</span>
+                      <span className="whatsapp-text-short">WhatsApp — +91 99 1867 1867</span>
                     </motion.a>
                   </motion.div>
 
                   {/* Privacy note */}
                   <motion.p
-                    custom={8} variants={fieldVariants} initial="hidden" animate={inView ? "visible" : "hidden"}
+                    custom={8} variants={fieldVariants} initial="hidden" animate={inView ? 'visible' : 'hidden'}
                     style={{
                       fontSize: 13,
                       color: 'var(--muted)',
@@ -307,6 +412,7 @@ export default function AuditForm() {
                       alignItems: 'flex-start',
                       justifyContent: 'center',
                       gap: 8,
+                      margin: 0,
                     }}
                   >
                     <FiLock style={{ marginTop: 2, width: 16, height: 16, flexShrink: 0 }} aria-hidden />
@@ -319,7 +425,7 @@ export default function AuditForm() {
                 </div>
               </motion.div>
             ) : (
-              /* Success State */
+              /* ── Success State ── */
               <motion.div
                 key="success"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -332,9 +438,16 @@ export default function AuditForm() {
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
                 >
-                  <HiCheckCircle style={{ display: 'block', margin: '0 auto 20px', width: 64, height: 64, color: '#16a34a' }} aria-hidden />
+                  <HiCheckCircle
+                    style={{ display: 'block', margin: '0 auto 20px', width: 64, height: 64, color: '#16a34a' }}
+                    aria-hidden
+                  />
                 </motion.div>
-                <h3
+
+                <motion.h3
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25, duration: 0.4 }}
                   style={{
                     fontFamily: "'Bricolage Grotesque', sans-serif",
                     fontSize: 24,
@@ -344,8 +457,12 @@ export default function AuditForm() {
                   }}
                 >
                   Request Sent Successfully!
-                </h3>
-                <p
+                </motion.h3>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35, duration: 0.4 }}
                   style={{
                     fontSize: 16,
                     color: 'var(--muted)',
@@ -354,11 +471,17 @@ export default function AuditForm() {
                     marginBottom: 24,
                   }}
                 >
-                  Thank you! We&apos;ve received your audit request.
+                  Thank you, <strong>{form.name}</strong>! We&apos;ve received your audit request.
                   <br />
                   Our team will reach out within <strong>24 hours</strong> to schedule your free call.
-                </p>
-                <a
+                </motion.p>
+
+                <motion.a
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.45, duration: 0.4 }}
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
                   href="https://wa.me/919918671867?text=Hi%2C%20I%20just%20submitted%20the%20audit%20form%20and%20want%20to%20schedule%20my%20call."
                   target="_blank"
                   rel="noopener noreferrer"
@@ -377,7 +500,7 @@ export default function AuditForm() {
                 >
                   <FaWhatsapp style={{ width: 20, height: 20, flexShrink: 0 }} />
                   WhatsApp Us Now
-                </a>
+                </motion.a>
               </motion.div>
             )}
           </AnimatePresence>
