@@ -1,10 +1,7 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useState, useRef } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import { FiPlus, FiMinus } from "react-icons/fi";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const faqs = [
   {
@@ -35,33 +32,12 @@ const faqs = [
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState(null);
-  const titleRef = useRef(null);
   const sectionRef = useRef(null);
+  const inView = useInView(sectionRef, { once: true, margin: "-80px" });
 
   const handleToggle = (index) => {
     setOpenIndex((prev) => (prev === index ? null : index));
   };
-
-  useEffect(() => {
-    const title = titleRef.current;
-    if (!title) return;
-
-    const anim = gsap.fromTo(
-      title,
-      { opacity: 0, y: 40 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.7,
-        scrollTrigger: { trigger: title, start: "top 85%" },
-      },
-    );
-
-    return () => {
-      anim.scrollTrigger?.kill();
-      anim.kill();
-    };
-  }, []);
 
   return (
     <>
@@ -72,23 +48,15 @@ export default function FAQ() {
           background: var(--cream);
           padding: 80px 5%;
         }
-        .faq-inner {
-          max-width: 780px;
-          margin: 0 auto;
-        }
-        .faq-list {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
+        .faq-inner { max-width: 780px; margin: 0 auto; }
+        .faq-list { display: flex; flex-direction: column; gap: 12px; }
         .faq-item {
           background: var(--white);
           border-radius: 14px;
           transition: border-color 0.3s, box-shadow 0.3s;
+          overflow: hidden;
         }
-        .faq-item--open {
-          box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-        }
+        .faq-item--open { box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
         .faq-btn {
           width: 100%;
           padding: 20px 24px;
@@ -124,31 +92,12 @@ export default function FAQ() {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 20px;
-          font-weight: 300;
-          line-height: 1;
           flex-shrink: 0;
-          transition: transform 0.3s, background 0.3s, color 0.3s;
-          user-select: none;
-        }
-        .faq-icon--open {
-          transform: rotate(45deg);
-        }
-        .faq-panel {
-          display: grid;
-          grid-template-rows: 0fr;
-          transition: grid-template-rows 0.3s ease;
-        }
-        .faq-panel--open {
-          grid-template-rows: 1fr;
-        }
-        .faq-panel-inner {
-          overflow: hidden;
+          transition: background 0.3s, color 0.3s;
         }
         .faq-body {
           padding: 0 24px 20px;
           border-top: 1px solid var(--border);
-          border-radius: 0 0 14px 14px;
         }
         .faq-answer {
           padding-top: 16px;
@@ -158,7 +107,6 @@ export default function FAQ() {
           font-family: 'Public Sans', sans-serif;
           margin: 0;
         }
-
         @media (max-width: 600px) {
           .faq-section { padding: 56px 4%; }
           .faq-btn { padding: 16px 18px; }
@@ -170,7 +118,14 @@ export default function FAQ() {
 
       <section id="faq" ref={sectionRef} className="faq-section">
         <div className="faq-inner">
-          <div ref={titleRef} style={{ textAlign: "center", marginBottom: 52 }}>
+
+          {/* Title */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+            style={{ textAlign: "center", marginBottom: 52 }}
+          >
             <div
               style={{
                 fontSize: 11,
@@ -195,8 +150,9 @@ export default function FAQ() {
             >
               Frequently Asked Questions
             </h2>
-          </div>
+          </motion.div>
 
+          {/* FAQ Items — one by one */}
           <div className="faq-list">
             {faqs.map((f, i) => {
               const isOpen = openIndex === i;
@@ -204,8 +160,15 @@ export default function FAQ() {
               const buttonId = `faq-button-${i}`;
 
               return (
-                <div
+                <motion.div
                   key={f.q}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={inView ? { opacity: 1, y: 0 } : {}}
+                  transition={{
+                    duration: 0.5,
+                    delay: i * 0.1,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
                   className={`faq-item${isOpen ? " faq-item--open" : ""}`}
                   style={{
                     border: `1px solid ${isOpen ? "var(--blue)" : "var(--border)"}`,
@@ -220,37 +183,45 @@ export default function FAQ() {
                     aria-controls={panelId}
                   >
                     <span className="faq-question">{f.q}</span>
-                    <span
+                    <motion.span
                       className="faq-icon"
-                      aria-hidden="true"
-                      style={{
-                        background: isOpen
-                          ? "var(--blue)"
-                          : "var(--light-grey)",
+                      animate={{
+                        background: isOpen ? "var(--blue)" : "var(--light-grey)",
                         color: isOpen ? "white" : "var(--blue)",
+                        rotate: isOpen ? 45 : 0,
                       }}
+                      transition={{ duration: 0.25 }}
+                      aria-hidden="true"
                     >
-                      {isOpen ? <FiMinus size={16} /> : <FiPlus size={16} />}
-                    </span>
+                      <FiPlus size={16} />
+                    </motion.span>
                   </button>
 
-                  <div
-                    id={panelId}
-                    role="region"
-                    aria-labelledby={buttonId}
-                    className={`faq-panel${isOpen ? " faq-panel--open" : ""}`}
-                    aria-hidden={!isOpen}
-                  >
-                    <div className="faq-panel-inner">
-                      <div className="faq-body">
-                        <p className="faq-answer">{f.a}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  {/* Accordion panel */}
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        id={panelId}
+                        role="region"
+                        aria-labelledby={buttonId}
+                        key="panel"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <div className="faq-body">
+                          <p className="faq-answer">{f.a}</p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               );
             })}
           </div>
+
         </div>
       </section>
     </>

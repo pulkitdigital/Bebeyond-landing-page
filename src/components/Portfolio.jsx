@@ -28,17 +28,40 @@ const projects = [
     name: 'Amber Group',
     desc: 'Created a premium online identity for this hospitality brand — clean website and consistent social media to match their brand experience.',
   },
+  {
+    image: '/dayanand.webp',
+    tag: 'Video Editing',
+    type: 'Higher Education Institution',
+    name: 'Dayanand Sagar University',
+    desc: 'Dayanand Sagar University is a multidisciplinary institution focused on education and research, requiring professional lecture video editing to enhance clarity, engagement, and ease of learning.',
+  },
+  {
+    image: '/hamper-exchange.webp',
+    tag: 'E-Commerce Development',
+    type: 'Wellness & Gifting Brand',
+    name: 'The Hamper Exchange',
+    desc: 'The Hamper Exchange is a care and wellness brand offering curated gift hampers, requiring a clean, calming, and conversion-friendly Shopify website for a seamless gifting experience.',
+  },
+   {
+    image: '/khan-academy.webp',
+    tag: 'Video Editing',
+    type: 'Online Learning Platform',
+    name: 'Khan Academy',
+    desc: 'Khan Academy is a personalized learning platform, requiring professional video editing to enhance instructional clarity, learner engagement, and the overall digital learning experience.',
+  },
 ]
 
 const clients = [
-  'Khan Academy',
   'Indian School of Business',
   'Max Healthcare',
   'Humans of Bombay',
-  'Dayanand Sagar University',
   'Lovely Jewellers',
-  'Amber Group',
   'Ttapio Cafe',
+  'First Print Publication',
+  'IBrand Solution',
+  'UBER Marketing Solutions',
+  'Scanner Adda',
+  'Sinaaga Jewellers'
 ]
 
 export default function Portfolio() {

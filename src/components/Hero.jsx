@@ -1,88 +1,76 @@
 'use client'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import { FiArrowRight, FiCheck } from 'react-icons/fi'
 
-/* ─── Rotating Visual ─────────────────────────────────────────── */
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  show: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: i * 0.08 },
+  }),
+}
+
+const fadeIn = {
+  hidden: { opacity: 0 },
+  show: (i = 0) => ({
+    opacity: 1,
+    transition: { duration: 0.5, delay: i * 0.08 },
+  }),
+}
+
 function RotatingSquare() {
   return (
-    <div className="hero-visual-wrap">
-      {/* Orbit track rings */}
+    <motion.div
+      className="hero-visual-wrap"
+      initial={{ opacity: 0, scale: 0.85 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+    >
       <div className="orbit-ring orbit-ring--outer" />
       <div className="orbit-ring orbit-ring--mid" />
-
-      {/* Outer services circle image — ROTATES */}
       <div className="square-spinner">
-        <img
-          src="/circle-image.png"
-          alt="BeBeyond Services"
-          className="square-img"
-        />
+        <img src="/circle-image.webp" alt="BeBeyond Services" className="square-img" />
       </div>
-
-      {/* Center BeBeyond logo — FIXED, does NOT rotate */}
-      <div className="logo-center">
-        <img
-          src="/logo.png"
-          alt="BeBeyond Digital Solutions"
-          className="logo-img"
-        />
-      </div>
-
-      {/* Floating badge — top-right */}
-      {/* <div className="hero-badge hero-badge--tr">
-        <span className="badge-dot" />
-        <span>Meta Ads</span>
-      </div> */}
-
-      {/* Floating badge — bottom-left */}
-      {/* <div className="hero-badge hero-badge--bl">
-        <span className="badge-dot badge-dot--orange" />
-        <span>SEO &amp; Growth</span>
-      </div> */}
-    </div>
+    </motion.div>
   )
 }
 
-/* ─── Stat pill ───────────────────────────────────────────────── */
-function Stat({ value, label }) {
+function Stat({ value, label, i }) {
   return (
-    <div className="hero-stat">
-      <span className="hero-stat__value">{value}</span>
+    <motion.div className="hero-stat" variants={fadeUp} custom={i}>
+      <motion.span
+        className="hero-stat__value"
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 14, delay: 0.9 + i * 0.12 }}
+      >
+        {value}
+      </motion.span>
       <span className="hero-stat__label">{label}</span>
-    </div>
+    </motion.div>
   )
 }
 
-/* ─── Hero ────────────────────────────────────────────────────── */
 export default function Hero() {
   const sectionRef = useRef(null)
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] })
+  const parallaxY = useTransform(scrollYProgress, [0, 1], [0, 60])
 
-  useEffect(() => {
-    const section = sectionRef.current
-    if (!section) return
-    const onMove = (e) => {
-      const { innerWidth: W, innerHeight: H } = window
-      const x = (e.clientX / W - 0.5) * 18
-      const y = (e.clientY / H - 0.5) * 10
-      const visual = section.querySelector('.hero-visual-wrap')
-      if (visual) visual.style.transform = `translate(${x}px, ${y}px)`
-    }
-    window.addEventListener('mousemove', onMove)
-    return () => window.removeEventListener('mousemove', onMove)
-  }, [])
+  const headingWords = 'Get More Customers Online —'.split(' ')
 
   return (
     <>
       <style>{`
-        /* ---------- section ---------- */
         .hero-section {
           position: relative;
           min-height: 100vh;
           background: var(--ink);
           display: flex;
           align-items: center;
-          overflow: hidden;
-          padding: 100px 0 60px;
+          overflow: hidden; 
+          padding: 60px 20px 60px;
         }
         .hero-section::before {
           content: '';
@@ -103,8 +91,6 @@ export default function Hero() {
           background-size: 60px 60px;
           pointer-events: none;
         }
-
-        /* ---------- layout ---------- */
         .hero-inner {
           position: relative;
           z-index: 1;
@@ -116,8 +102,6 @@ export default function Hero() {
           gap: 60px;
           align-items: center;
         }
-
-        /* ---------- eyebrow ---------- */
         .hero-eyebrow {
           display: inline-flex;
           align-items: center;
@@ -131,7 +115,7 @@ export default function Hero() {
           color: var(--blue);
           letter-spacing: .06em;
           text-transform: uppercase;
-          margin-bottom: 28px;
+          margin-bottom: 24px;
         }
         .hero-eyebrow-dot {
           width: 7px; height: 7px;
@@ -140,37 +124,53 @@ export default function Hero() {
           animation: var(--animate-hb-dot);
         }
 
-        /* ---------- heading ---------- */
+        /* ── Heading ── */
         .hero-h1 {
           font-family: 'Bricolage Grotesque', sans-serif;
-          font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+          font-size: clamp(1.6rem, 3.2vw, 2.6rem);
           font-weight: 800;
-          line-height: 1.1;
+          line-height: 1.15;
           color: #fff;
-          margin-bottom: 22px;
+          margin-bottom: 20px;
           letter-spacing: -0.02em;
         }
         .hero-h1 .accent-orange { color: var(--orange); }
         .hero-h1 .accent-blue   { color: var(--blue);   }
 
-        /* ---------- subtitle ---------- */
+        /* underline sweep on FREE */
+        .accent-blue {
+          position: relative;
+          display: inline-block;
+        }
+        .accent-blue::after {
+          content: '';
+          position: absolute;
+          left: 0; bottom: -2px;
+          height: 2px;
+          width: 0%;
+          background: var(--blue);
+          border-radius: 2px;
+          animation: underline-sweep 0.6s ease forwards 1.4s;
+        }
+        @keyframes underline-sweep {
+          to { width: 100%; }
+        }
+
         .hero-sub {
           font-family: 'Public Sans', sans-serif;
-          font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+          font-size: clamp(0.88rem, 1.4vw, 1rem);
           font-weight: 400;
           color: rgba(255,255,255,.6);
           line-height: 1.7;
           max-width: 480px;
-          margin-bottom: 36px;
+          margin-bottom: 32px;
         }
-
-        /* ---------- cta ---------- */
         .hero-cta-row {
           display: flex;
           align-items: center;
           gap: 16px;
           flex-wrap: wrap;
-          margin-bottom: 44px;
+          margin-bottom: 40px;
         }
         .btn-primary {
           display: inline-flex;
@@ -179,29 +179,41 @@ export default function Hero() {
           background: var(--orange);
           color: #fff;
           font-family: 'Public Sans', sans-serif;
-          font-size: .95rem;
+          font-size: .92rem;
           font-weight: 700;
-          padding: 14px 28px;
+          padding: 13px 26px;
           border-radius: 10px;
           text-decoration: none;
-          transition: background .2s, transform .2s, box-shadow .2s;
+          transition: background .2s, box-shadow .2s;
           box-shadow: 0 4px 24px rgba(251,133,0,.3);
+          position: relative;
+          overflow: hidden;
         }
-        .btn-primary:hover {
-          background: #e07800;
-          transform: translateY(-2px);
-          box-shadow: 0 8px 32px rgba(251,133,0,.4);
+        /* shimmer sweep on btn-primary */
+        .btn-primary::before {
+          content: '';
+          position: absolute;
+          top: 0; left: -75%;
+          width: 50%; height: 100%;
+          background: rgba(255,255,255,.18);
+          transform: skewX(-20deg);
+          animation: btn-shimmer 3s ease-in-out infinite 1.8s;
         }
+        @keyframes btn-shimmer {
+          0%   { left: -75%; }
+          40%  { left: 125%; }
+          100% { left: 125%; }
+        }
+        .btn-primary:hover { background: #e07800; box-shadow: 0 8px 32px rgba(251,133,0,.4); }
         .btn-primary svg { transition: transform .2s; }
         .btn-primary:hover svg { transform: translateX(4px); }
-
         .btn-ghost {
           display: inline-flex;
           align-items: center;
           gap: 8px;
           color: rgba(255,255,255,.7);
           font-family: 'Public Sans', sans-serif;
-          font-size: .9rem;
+          font-size: .88rem;
           font-weight: 500;
           text-decoration: none;
           border-bottom: 1px solid rgba(255,255,255,.2);
@@ -209,64 +221,55 @@ export default function Hero() {
           transition: color .2s, border-color .2s;
         }
         .btn-ghost:hover { color: #fff; border-color: rgba(255,255,255,.6); }
-
-        /* ---------- checks ---------- */
         .hero-checks {
           display: flex;
           flex-wrap: wrap;
-          gap: 12px 20px;
+          gap: 10px 18px;
         }
         .hero-check {
           display: flex;
           align-items: center;
           gap: 7px;
           font-family: 'Public Sans', sans-serif;
-          font-size: .82rem;
+          font-size: .8rem;
           color: rgba(255,255,255,.5);
         }
         .hero-check svg { color: var(--blue); flex-shrink: 0; }
-
-        /* ---------- stats ---------- */
         .hero-stats {
           display: flex;
           border-top: 1px solid rgba(255,255,255,.08);
-          padding-top: 36px;
-          margin-top: 36px;
+          padding-top: 32px;
+          margin-top: 32px;
         }
         .hero-stat {
           display: flex;
           flex-direction: column;
           gap: 4px;
-          padding-right: 32px;
-          margin-right: 32px;
+          padding-right: 28px;
+          margin-right: 28px;
           border-right: 1px solid rgba(255,255,255,.08);
         }
         .hero-stat:last-child { border-right: none; margin-right: 0; padding-right: 0; }
         .hero-stat__value {
           font-family: 'Bricolage Grotesque', sans-serif;
-          font-size: 1.7rem;
+          font-size: 1.6rem;
           font-weight: 800;
           color: var(--orange);
           line-height: 1;
         }
         .hero-stat__label {
-          font-size: .75rem;
+          font-size: .72rem;
           color: rgba(255,255,255,.4);
           font-family: 'Public Sans', sans-serif;
         }
-
-        /* ---------- visual wrapper ---------- */
         .hero-visual-wrap {
           position: relative;
           width: 100%;
           aspect-ratio: 1;
           max-width: 480px;
           margin: 0 auto;
-          transition: transform .1s linear;
           will-change: transform;
         }
-
-        /* ---------- orbit rings ---------- */
         .orbit-ring {
           position: absolute;
           border-radius: 50%;
@@ -285,101 +288,29 @@ export default function Hero() {
         }
         @keyframes spin-cw  { from { transform: translate(-50%,-50%) rotate(0deg);   } to { transform: translate(-50%,-50%) rotate(360deg);  } }
         @keyframes spin-ccw { from { transform: translate(-50%,-50%) rotate(0deg);   } to { transform: translate(-50%,-50%) rotate(-360deg); } }
-
-        /* ---------- outer image — rotates ---------- */
         .square-spinner {
           position: absolute;
           inset: 0;
           animation: outer-spin 18s linear infinite;
           will-change: transform;
         }
-        @keyframes outer-spin {
-          from { transform: rotate(0deg);   }
-          to   { transform: rotate(360deg); }
-        }
-        .square-img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          display: block;
-        }
+        // @keyframes outer-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        // .square-img { width: 100%; height: 100%; object-fit: contain; display: block; }
 
-        /* ---------- center logo — FIXED ---------- */
-        .logo-center {
-          position: absolute;
-          top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: 18%; height: 18%;
-          z-index: 10;
-          border-radius: 16px;
-          overflow: hidden;
-          // box-shadow:
-          //   0 0 0 3px rgba(33,158,188,.35),
-          //   0 8px 40px rgba(0,0,0,.6),
-          //   0 0 60px rgba(33,158,188,.2);
-          // animation: logo-glow 3s ease-in-out infinite;
-        }
-        @keyframes logo-glow {
-          0%,100% { box-shadow: 0 0 0 3px rgba(33,158,188,.35), 0 8px 40px rgba(0,0,0,.6), 0 0 30px rgba(33,158,188,.2); }
-          50%      { box-shadow: 0 0 0 3px rgba(33,158,188,.6),  0 8px 40px rgba(0,0,0,.6), 0 0 60px rgba(33,158,188,.45); }
-        }
-        .logo-img {
-          width: 100%; height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-
-        /* ---------- badges ---------- */
-        .hero-badge {
-          position: absolute;
-          display: flex;
-          align-items: center;
-          gap: 7px;
-          background: rgba(10,22,40,.88);
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(255,255,255,.1);
-          border-radius: 100px;
-          padding: 8px 16px;
-          font-family: 'Public Sans', sans-serif;
-          font-size: .78rem;
-          font-weight: 600;
-          color: #fff;
-          white-space: nowrap;
-          box-shadow: 0 4px 20px rgba(0,0,0,.4);
-          z-index: 20;
-        }
-        .hero-badge--tr { top: 6%; right: -2%; animation: badge-float 3s ease-in-out infinite alternate; }
-        .hero-badge--bl { bottom: 8%; left: -2%; animation: badge-float 3s ease-in-out 1.2s infinite alternate; }
-        @keyframes badge-float {
-          from { transform: translateY(0);   }
-          to   { transform: translateY(-8px); }
-        }
-        .badge-dot {
-          width: 8px; height: 8px;
-          border-radius: 50%;
-          background: var(--blue);
-          animation: var(--animate-hb-dot);
-        }
-        .badge-dot--orange { background: var(--orange); }
-
-        /* ---------- responsive ---------- */
         @media (max-width: 900px) {
-          .hero-inner {
-            grid-template-columns: 1fr;
-            text-align: center;
-          }
-          .hero-sub      { max-width: 100%; }
+          .hero-inner { grid-template-columns: 1fr; text-align: center; }
+          .hero-sub    { max-width: 100%; }
           .hero-cta-row  { justify-content: center; }
           .hero-checks   { justify-content: center; }
           .hero-stats    { justify-content: center; }
-          .hero-visual-wrap { max-width: 320px; order: -1; }
-          .hero-badge--tr { right: 0; }
-          .hero-badge--bl { left:  0; }
+          .hero-visual-wrap { max-width: 300px; order: -1; }
         }
         @media (max-width: 480px) {
-          .hero-section { padding: 90px 0 50px; }
-          .hero-inner   { padding: 0 20px; gap: 40px; }
-          .hero-stat    { padding-right: 20px; margin-right: 20px; }
+          .hero-section  { padding: 90px 0 50px; }
+          .hero-inner    { padding: 0 20px; gap: 32px; }
+          .hero-stat     { padding-right: 18px; margin-right: 18px; }
+          .hero-visual-wrap { max-width: 240px; }
+          .hero-h1       { font-size: clamp(1.35rem, 7vw, 1.8rem); }
         }
       `}</style>
 
@@ -387,53 +318,128 @@ export default function Hero() {
         <div className="hero-inner">
 
           {/* ── LEFT: Text ── */}
-          <div className="hero-text">
-            <div className="hero-eyebrow">
-              <span className="hero-eyebrow-dot" />
+          <motion.div
+            className="hero-text"
+            initial="hidden"
+            animate="show"
+            variants={{ show: { transition: { staggerChildren: 0.08 } } }}
+          >
+            {/* Eyebrow */}
+            <motion.div className="hero-eyebrow" variants={fadeUp} custom={0}>
+              <motion.span
+                className="hero-eyebrow-dot"
+                animate={{ scale: [1, 1.4, 1] }}
+                transition={{ duration: 1.2, repeat: Infinity, repeatDelay: 1 }}
+              />
               Based in Prayagraj · Working Across India
-            </div>
+            </motion.div>
 
+            {/* Heading — word by word */}
             <h1 className="hero-h1">
-              Get More Customers<br />
-              Online —{' '}
-              <span className="accent-orange">
-                Starting With a&nbsp;<span className="accent-blue">FREE</span> Audit
-              </span>
+              {headingWords.map((word, i) => (
+                <motion.span
+                  key={i}
+                  style={{ display: 'inline-block', marginRight: '0.28em' }}
+                  initial={{ opacity: 0, y: 28, filter: 'blur(4px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.2 + i * 0.07 }}
+                >
+                  {word}
+                </motion.span>
+              ))}
+              <br />
+              <motion.span
+                className="accent-orange"
+                initial={{ opacity: 0, y: 28, filter: 'blur(4px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.2 + headingWords.length * 0.07 }}
+                style={{ display: 'inline-block' }}
+              >
+                Starting With a&nbsp;
+                <motion.span
+                  className="accent-blue"
+                  whileHover={{ scale: 1.06 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 12 }}
+                  style={{ display: 'inline-block', cursor: 'default' }}
+                >
+                  FREE
+                </motion.span>
+                {' '}Audit
+              </motion.span>
             </h1>
 
-            <p className="hero-sub">
-              We'll review your entire digital presence in 30 minutes and tell you
-              exactly why customers aren't finding you — and how to fix it.
+            {/* Subtitle */}
+            <motion.p className="hero-sub" variants={fadeUp} custom={3}>
+              We&apos;ll review your entire digital presence in 30 minutes and tell you
+              exactly why customers aren&apos;t finding you — and how to fix it.
               No tech jargon. No pressure. Just real clarity.
-            </p>
+            </motion.p>
 
-            <div className="hero-cta-row">
-              <a href="#audit-form" className="btn-primary">
+            {/* CTA */}
+            <motion.div className="hero-cta-row" variants={fadeUp} custom={4}>
+              <motion.a
+                href="#audit-form"
+                className="btn-primary"
+                whileHover={{ scale: 1.04, y: -2 }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+              >
                 Book My Free Audit Now
                 <FiArrowRight />
-              </a>
-              <a href="#portfolio" className="btn-ghost">
+              </motion.a>
+              <motion.a
+                href="#portfolio"
+                className="btn-ghost"
+                whileHover={{ x: 5 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              >
                 See Our Work
-              </a>
-            </div>
+              </motion.a>
+            </motion.div>
 
-            <div className="hero-checks">
-              {['30-Minute Call', '100% Free, No Obligation', 'Prayagraj & All India'].map(t => (
-                <span key={t} className="hero-check">
-                  <FiCheck size={13} /> {t}
-                </span>
+            {/* Checks */}
+            <motion.div className="hero-checks" variants={fadeIn} custom={5}>
+              {['30-Minute Call', '100% Free, No Obligation', 'Prayagraj & All India'].map((t, i) => (
+                <motion.span
+                  key={t}
+                  className="hero-check"
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: 0.65 + i * 0.1 }}
+                >
+                  <motion.span
+                    initial={{ scale: 0, rotate: -90 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 14, delay: 0.7 + i * 0.1 }}
+                  >
+                    <FiCheck size={13} />
+                  </motion.span>
+                  {t}
+                </motion.span>
               ))}
-            </div>
+            </motion.div>
 
-            <div className="hero-stats">
-              <Stat value="50+" label="Brands Grown" />
-              <Stat value="3×"  label="Avg. ROI" />
-              <Stat value="24h" label="Response Time" />
-            </div>
-          </div>
+            {/* Stats */}
+            <motion.div
+              className="hero-stats"
+              initial="hidden"
+              animate="show"
+              variants={{ show: { transition: { staggerChildren: 0.1, delayChildren: 0.85 } } }}
+            >
+              {[
+                { value: '50+', label: 'Brands Grown' },
+                { value: '12×', label: 'Avg. ROI' },
+                { value: '2h',  label: 'Response Time' },
+              ].map(({ value, label }, i) => (
+                <Stat key={label} value={value} label={label} i={i} />
+              ))}
+            </motion.div>
+          </motion.div>
 
           {/* ── RIGHT: Visual ── */}
-          <RotatingSquare />
+          <motion.div style={{ y: parallaxY }}>
+            <RotatingSquare />
+          </motion.div>
 
         </div>
       </section>

@@ -1,11 +1,8 @@
 'use client'
-import { useEffect, useRef } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useRef } from 'react'
+import { motion, useInView } from 'framer-motion'
 import { FaBullseye, FaMobileAlt, FaGlobe, FaShoppingCart, FaFilm } from 'react-icons/fa'
 import { HiSearch } from 'react-icons/hi'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const CARD_ICON = 'h-8 w-8 shrink-0 text-[var(--blue)]'
 
@@ -18,35 +15,97 @@ const services = [
   { Icon: FaFilm, title: 'Video Editing', desc: "Professional editing for social media, educational content, and brand videos. We've edited for ISB, Khan Academy, Max Healthcare." },
 ]
 
-export default function Services() {
-  const cardsRef = useRef([])
-  const titleRef = useRef()
+function AnimatedCard({ s, i, inView }) {
+  const Icon = s.Icon
+  return (
+    <motion.div
+      key={s.title}
+      initial={{ opacity: 0, y: 40 }}
+      animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+      transition={{
+        duration: 0.5,
+        delay: i * 0.15,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      style={{
+        background: 'var(--white)',
+        border: '1px solid var(--border)',
+        borderRadius: 14,
+        padding: 28,
+        transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.2s',
+        cursor: 'default',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = 'var(--blue)'
+        e.currentTarget.style.boxShadow = '0 8px 32px rgba(33,158,188,0.12)'
+        e.currentTarget.style.transform = 'translateY(-3px)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = 'var(--border)'
+        e.currentTarget.style.boxShadow = 'none'
+        e.currentTarget.style.transform = 'translateY(0)'
+      }}
+    >
+      <Icon className={CARD_ICON} aria-hidden />
+      <h3
+        style={{
+          fontFamily: "'Bricolage Grotesque', sans-serif",
+          fontSize: 17,
+          fontWeight: 700,
+          color: 'var(--ink)',
+          marginBottom: 10,
+          marginTop: 16,
+        }}
+      >
+        {s.title}
+      </h3>
+      <p
+        style={{
+          fontSize: 14,
+          color: 'var(--muted)',
+          lineHeight: 1.65,
+          fontFamily: "'Public Sans', sans-serif",
+        }}
+      >
+        {s.desc}
+      </p>
+    </motion.div>
+  )
+}
 
-  useEffect(() => {
-    gsap.fromTo(
-      titleRef.current,
-      { opacity: 0, y: 40 },
-      { opacity: 1, y: 0, duration: 0.7, scrollTrigger: { trigger: titleRef.current, start: 'top 85%' } }
-    )
-    cardsRef.current.forEach((card, i) => {
-      gsap.fromTo(
-        card,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          delay: i * 0.08,
-          scrollTrigger: { trigger: card, start: 'top 88%' },
-        }
-      )
-    })
-  }, [])
+export default function Services() {
+  const titleRef = useRef()
+  const gridRef = useRef()
+
+  const titleInView = useInView(titleRef, { once: true, margin: '-80px' })
+  const gridInView = useInView(gridRef, { once: true, margin: '-60px' })
 
   return (
     <section id="services" style={{ background: 'var(--cream)', padding: '80px 5%' }}>
+      <style>{`
+        #services-grid {
+          display: grid;
+          gap: 20px;
+          grid-template-columns: repeat(3, 1fr);
+        }
+        @media (max-width: 900px) {
+          #services-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 560px) {
+          #services-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
       <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div ref={titleRef} style={{ textAlign: 'center', marginBottom: 52 }}>
+
+        {/* Title */}
+        <motion.div
+          ref={titleRef}
+          initial={{ opacity: 0, y: 40 }}
+          animate={titleInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          style={{ textAlign: 'center', marginBottom: 52 }}
+        >
           <div
             style={{
               fontSize: 11,
@@ -83,69 +142,15 @@ export default function Services() {
           >
             No need to hire 5 different vendors. BeBeyond handles your entire digital presence.
           </p>
+        </motion.div>
+
+        {/* Cards Grid */}
+        <div id="services-grid" ref={gridRef}>
+          {services.map((s, i) => (
+            <AnimatedCard key={s.title} s={s} i={i} inView={gridInView} />
+          ))}
         </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: 20,
-          }}
-        >
-          {services.map((s, i) => {
-            const Icon = s.Icon
-            return (
-            <div
-              key={s.title}
-              ref={(el) => {
-                cardsRef.current[i] = el
-              }}
-              style={{
-                background: 'var(--white)',
-                border: '1px solid var(--border)',
-                borderRadius: 14,
-                padding: 28,
-                transition: 'all 0.2s',
-                cursor: 'default',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--blue)'
-                e.currentTarget.style.boxShadow = '0 8px 32px rgba(33,158,188,0.12)'
-                e.currentTarget.style.transform = 'translateY(-3px)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border)'
-                e.currentTarget.style.boxShadow = 'none'
-                e.currentTarget.style.transform = 'translateY(0)'
-              }}
-            >
-              <Icon className={CARD_ICON} aria-hidden />
-              <h3
-                style={{
-                  fontFamily: "'Bricolage Grotesque', sans-serif",
-                  fontSize: 17,
-                  fontWeight: 700,
-                  color: 'var(--ink)',
-                  marginBottom: 10,
-                  marginTop: 16,
-                }}
-              >
-                {s.title}
-              </h3>
-              <p
-                style={{
-                  fontSize: 14,
-                  color: 'var(--muted)',
-                  lineHeight: 1.65,
-                  fontFamily: "'Public Sans', sans-serif",
-                }}
-              >
-                {s.desc}
-              </p>
-            </div>
-            )
-          })}
-        </div>
       </div>
     </section>
   )

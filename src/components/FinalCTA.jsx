@@ -1,13 +1,10 @@
 'use client'
-import { useEffect, useRef } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useRef } from 'react'
+import { motion, useInView } from 'framer-motion'
 import { HiClipboardDocumentList, HiArrowRight } from 'react-icons/hi2'
 import { FaWhatsapp } from 'react-icons/fa'
 import { FiPhone } from 'react-icons/fi'
 import { MdLocationOn, MdEmail } from 'react-icons/md'
-
-gsap.registerPlugin(ScrollTrigger)
 
 const contactStrip = [
   { Icon: MdLocationOn, text: 'Chamber 6 Sangam Place, Civil Lines, Prayagraj, UP 211001' },
@@ -23,26 +20,15 @@ const footerLinks = [
   ['Contact',  'https://bebeyond.digital/contact'],
 ]
 
+const ease = [0.22, 1, 0.36, 1]
+
 export default function FinalCTA() {
   const sectionRef = useRef()
-  const headRef    = useRef()
-  const btnsRef    = useRef()
-  const stripRef   = useRef()
-
-  useEffect(() => {
-    const tl = gsap.timeline({
-      scrollTrigger: { trigger: sectionRef.current, start: 'top 78%' },
-    })
-    tl.fromTo(sectionRef.current, { opacity: 0 }, { opacity: 1, duration: 0.4 })
-      .fromTo(headRef.current,    { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.7 }, 0.1)
-      .fromTo(btnsRef.current,    { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6 }, 0.4)
-      .fromTo(stripRef.current,   { opacity: 0 },        { opacity: 1, duration: 0.5 },       0.7)
-  }, [])
+  const inView = useInView(sectionRef, { once: true, margin: '-80px' })
 
   return (
     <>
       <style>{`
-        /* ── Section ── */
         .fcta-section {
           position: relative;
           background: var(--ink);
@@ -52,8 +38,6 @@ export default function FinalCTA() {
           isolation: isolate;
           font-family: 'Public Sans', sans-serif;
         }
-
-        /* Subtle grid background */
         .fcta-grid-bg {
           position: absolute;
           inset: 0;
@@ -66,8 +50,6 @@ export default function FinalCTA() {
           z-index: 0;
           pointer-events: none;
         }
-
-        /* Ambient glows */
         .fcta-glow-left {
           position: absolute;
           left: -100px; top: 40%;
@@ -86,16 +68,12 @@ export default function FinalCTA() {
           z-index: 1;
           pointer-events: none;
         }
-
-        /* Content */
         .fcta-content {
           position: relative;
           z-index: 2;
           max-width: 720px;
           margin: 0 auto;
         }
-
-        /* Badge */
         .fcta-badge {
           display: inline-flex;
           align-items: center;
@@ -121,8 +99,6 @@ export default function FinalCTA() {
           0%, 100% { opacity: 1; transform: scale(1); }
           50%       { opacity: 0.4; transform: scale(0.6); }
         }
-
-        /* Heading */
         .fcta-heading {
           font-family: 'Bricolage Grotesque', sans-serif;
           font-size: clamp(30px, 5.5vw, 56px);
@@ -138,8 +114,6 @@ export default function FinalCTA() {
           -webkit-text-fill-color: transparent;
           background-clip: text;
         }
-
-        /* Subtext */
         .fcta-sub {
           font-size: clamp(15px, 2vw, 17px);
           color: rgba(255,255,255,0.58);
@@ -147,16 +121,12 @@ export default function FinalCTA() {
           margin: 0 auto 16px;
           max-width: 520px;
         }
-
-        /* Divider */
         .fcta-divider {
           width: 56px; height: 3px;
           background: linear-gradient(90deg, #219ebc, #fb8500);
           border-radius: 2px;
           margin: 0 auto 44px;
         }
-
-        /* Buttons */
         .fcta-btns {
           display: flex;
           gap: 12px;
@@ -222,8 +192,6 @@ export default function FinalCTA() {
           background: rgba(255,255,255,0.1);
           transform: translateY(-3px);
         }
-
-        /* Contact strip */
         .fcta-strip {
           display: flex;
           justify-content: center;
@@ -245,8 +213,6 @@ export default function FinalCTA() {
         .fcta-strip-item:last-child { border-right: none; }
         .fcta-strip-item:hover { color: rgba(255,255,255,0.88); }
         .fcta-strip-icon { color: #219ebc; font-size: 16px; flex-shrink: 0; }
-
-        /* Footer */
         .fcta-footer {
           background: #04070d;
           padding: 28px 5%;
@@ -270,8 +236,6 @@ export default function FinalCTA() {
         }
         .fcta-footer-link:hover { color: #219ebc; background: rgba(33,158,188,0.08); }
         .fcta-footer-copy { font-size: 12px; color: rgba(255,255,255,0.22); }
-
-        /* Mobile sticky bar */
         .fcta-mob-sticky {
           display: none;
           position: fixed;
@@ -299,7 +263,7 @@ export default function FinalCTA() {
           .fcta-section { padding: 80px 5% 80px; }
         }
         @media (max-width: 560px) {
-          .fcta-btns { flex-direction: column; }
+          .fcta-btns { flex-direction: column; align-items: stretch; }
           .fcta-btn-primary,
           .fcta-btn-wa,
           .fcta-btn-call {
@@ -322,7 +286,6 @@ export default function FinalCTA() {
         }
       `}</style>
 
-      {/* ── CTA Section ── */}
       <section ref={sectionRef} className="fcta-section">
         <div className="fcta-grid-bg" />
         <div className="fcta-glow-left" />
@@ -330,64 +293,114 @@ export default function FinalCTA() {
 
         <div className="fcta-content">
 
-          {/* Heading block */}
-          <div ref={headRef}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
-              <span className="fcta-badge">
-                <span className="fcta-badge-dot" />
-                Limited — 5 Spots Left This Month
-              </span>
-            </div>
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.55, delay: 0.05, ease }}
+            style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}
+          >
+            <span className="fcta-badge">
+              <span className="fcta-badge-dot" />
+              Limited — 5 Spots Left This Month
+            </span>
+          </motion.div>
 
-            <h2 className="fcta-heading">
-              Ready to Stop Being{' '}
-              <span className="fcta-grad">Invisible Online?</span>
-            </h2>
+          {/* Heading */}
+          <motion.h2
+            className="fcta-heading"
+            initial={{ opacity: 0, y: 40 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.65, delay: 0.15, ease }}
+          >
+            Ready to Stop Being{' '}
+            <span className="fcta-grad">Invisible Online?</span>
+          </motion.h2>
 
-            <p className="fcta-sub">
-              Book your free 30-minute audit today. We'll show you exactly what's holding
-              your business back — and how to fix it.
-            </p>
+          {/* Subtext */}
+          <motion.p
+            className="fcta-sub"
+            initial={{ opacity: 0, y: 28 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.25, ease }}
+          >
+            Book your free 30-minute audit today. We'll show you exactly what's holding
+            your business back — and how to fix it.
+          </motion.p>
 
-            <div className="fcta-divider" />
-          </div>
+          {/* Divider */}
+          <motion.div
+            className="fcta-divider"
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={inView ? { scaleX: 1, opacity: 1 } : {}}
+            transition={{ duration: 0.5, delay: 0.35, ease }}
+            style={{ originX: 0.5 }}
+          />
 
-          {/* Buttons */}
-          <div ref={btnsRef} className="fcta-btns">
-            <a href="#audit-form" className="fcta-btn-primary">
-              <HiClipboardDocumentList size={19} aria-hidden />
-              Book Free Audit
-            </a>
-            <a
-              href="https://wa.me/919918671867?text=Hi%2C%20I%20want%20to%20know%20more%20about%20BeBeyond%20Digital%20Solutions."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="fcta-btn-wa"
-            >
-              <FaWhatsapp size={19} aria-hidden />
-              WhatsApp Us
-            </a>
-            <a href="tel:+919918671867" className="fcta-btn-call">
-              <FiPhone size={17} aria-hidden />
-              Call Now
-            </a>
-          </div>
+          {/* Buttons — staggered one by one */}
+          <motion.div className="fcta-btns">
+            {[
+              <a key="audit" href="#audit-form" className="fcta-btn-primary">
+                <HiClipboardDocumentList size={19} aria-hidden />
+                Book Free Audit
+              </a>,
+              <a
+                key="wa"
+                href="https://wa.me/919918671867?text=Hi%2C%20I%20want%20to%20know%20more%20about%20BeBeyond%20Digital%20Solutions."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="fcta-btn-wa"
+              >
+                <FaWhatsapp size={19} aria-hidden />
+                WhatsApp Us
+              </a>,
+              <a key="call" href="tel:+919918671867" className="fcta-btn-call">
+                <FiPhone size={17} aria-hidden />
+                Call Now
+              </a>,
+            ].map((btn, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 24 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: 0.4 + i * 0.1, ease }}
+              >
+                {btn}
+              </motion.div>
+            ))}
+          </motion.div>
 
-          {/* Contact strip */}
-          <div ref={stripRef} className="fcta-strip">
-            {contactStrip.map(({ Icon, text }) => (
-              <div key={text} className="fcta-strip-item">
+          {/* Contact strip — items one by one */}
+          <motion.div
+            className="fcta-strip"
+            initial={{ opacity: 0 }}
+            animate={inView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.4, delay: 0.7, ease }}
+          >
+            {contactStrip.map(({ Icon, text }, i) => (
+              <motion.div
+                key={text}
+                className="fcta-strip-item"
+                initial={{ opacity: 0, y: 16 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.45, delay: 0.75 + i * 0.1, ease }}
+              >
                 <Icon className="fcta-strip-icon" aria-hidden />
                 {text}
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
         </div>
       </section>
 
       {/* ── Footer ── */}
-      <footer className="fcta-footer">
+      <motion.footer
+        className="fcta-footer"
+        initial={{ opacity: 0 }}
+        animate={inView ? { opacity: 1 } : {}}
+        transition={{ duration: 0.5, delay: 1.0, ease }}
+      >
         <div className="fcta-footer-links">
           {footerLinks.map(([label, href]) => (
             <a key={label} href={href} className="fcta-footer-link">{label}</a>
@@ -397,7 +410,7 @@ export default function FinalCTA() {
           © 2026 Be Beyond Digital Solutions. All Rights Reserved. | Designed by BeBeyond ·
           Prayagraj, Uttar Pradesh
         </p>
-      </footer>
+      </motion.footer>
 
       {/* ── Mobile sticky CTA ── */}
       <div className="fcta-mob-sticky">

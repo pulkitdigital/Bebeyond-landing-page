@@ -307,7 +307,7 @@ export default function Founder() {
               {/* Circle photo — replace src with your actual image */}
               <div className="fv3-circle-img">
                 <img
-                  src="/images/pulkit.jpg"
+                  src="/pulkit.png"
                   alt="Pulkit Singhal — Founder, BeBeyond Digital Solutions"
                 />
               </div>
